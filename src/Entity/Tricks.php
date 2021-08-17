@@ -27,7 +27,7 @@ class Tricks
     /**
      * @ORM\Column(type="text")
      */
-    private $Content;
+    private $Description;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -50,10 +50,16 @@ class Tricks
      */
     private $Users;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Media::class, mappedBy="tricks", cascade={"persist"})
+     */
+    private $media;
+
 
     public function __construct()
     {
         $this->pictures = new ArrayCollection();
+        $this->media = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -129,6 +135,36 @@ class Tricks
     public function setUsers(?Users $Users): self
     {
         $this->Users = $Users;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Media[]
+     */
+    public function getMedia(): Collection
+    {
+        return $this->media;
+    }
+
+    public function addMedium(Media $medium): self
+    {
+        if (!$this->media->contains($medium)) {
+            $this->media[] = $medium;
+            $medium->setTricks($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedium(Media $medium): self
+    {
+        if ($this->media->removeElement($medium)) {
+            // set the owning side to null (unless already changed)
+            if ($medium->getTricks() === $this) {
+                $medium->setTricks(null);
+            }
+        }
 
         return $this;
     }

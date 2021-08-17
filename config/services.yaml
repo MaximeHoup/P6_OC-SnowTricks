@@ -6,6 +6,7 @@
 parameters:
 
     avatar_directory: '%kernel.project_dir%/public/uploads/avatars'
+    trick_directory: '%kernel.project_dir%/public/uploads/tricks'
 
 services:
     # default configuration for services in *this* file
