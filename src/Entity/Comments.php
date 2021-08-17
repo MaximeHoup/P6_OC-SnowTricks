@@ -18,14 +18,14 @@ class Comments
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=500)
+     * @ORM\Column(type="text")
      */
-    private $content;
+    private $Content;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $createdAt;
+    private $Created_at;
 
     /**
      * @ORM\ManyToOne(targetEntity=Users::class, inversedBy="comments")

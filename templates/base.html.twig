@@ -19,21 +19,31 @@
 					<div class="collapse navbar-collapse" id="navbarColor01">
 						<ul class="navbar-nav ms-auto">
 							<li class="nav-item">
-								<a class="nav-link" href="/">Accueil</a>
+								<a class="nav-link" href="{{ path('home') }}">Accueil</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" href="/tricks">Tricks</a>
+								<a class="nav-link" href="{{ path('tricks') }}">Liste des tricks</a>
 							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="/signin">Connexion</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="/signup">Inscription</a>
-							</li>
+							{% if app.user %}
+								<li class="nav-item">
+									<a class="nav-link" href="{{ path('new') }}">Ajouter un trick</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
+								</li>
+							{% else %}
+								<li class="nav-item">
+									<a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="{{ path('signup') }}">Inscription</a>
+								</li>
+							{% endif %}
 						</ul>
 					</div>
 				</div>
 			</nav>
-			{% block body %}{% endblock %}
-		</body>
-	</html>
+			<div class="container"> {% block body %}{% endblock %}
+				</div>
+			</body>
+		</html>
