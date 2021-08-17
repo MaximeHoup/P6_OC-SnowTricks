@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+
+
 class RegistrationController extends AbstractController
 {
     /**
@@ -30,9 +32,20 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            $avatarFile = $form->getData()->getPhoto();
+            $avatar_uploads_directory = $this->getParameter('avatar_directory');
+            $avatarFilename = md5(uniqid()) . '.' . $avatarFile->guessExtension();
+            $avatarFile->move(
+                $avatar_uploads_directory,
+                $avatarFilename
+            );
+            $user->setPhoto($avatarFilename);
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
+            $this->addFlash('notice', 'Votre compte a bien été créé');
+
             // do anything else you need here, like send an email
 
             return $this->redirectToRoute('home');
