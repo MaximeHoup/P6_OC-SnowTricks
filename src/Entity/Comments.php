@@ -20,12 +20,12 @@ class Comments
     /**
      * @ORM\Column(type="string", length=500)
      */
-    private $Content;
+    private $content;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      */
-    private $Created_at;
+    private $createdAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Users::class, inversedBy="comments")

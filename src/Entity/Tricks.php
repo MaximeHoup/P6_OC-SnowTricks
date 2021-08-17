@@ -25,9 +25,9 @@ class Tricks
     private $Name;
 
     /**
-     * @ORM\Column(type="string", length=1000)
+     * @ORM\Column(type="text")
      */
-    private $Description;
+    private $Content;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -50,10 +50,6 @@ class Tricks
      */
     private $Users;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Pictures::class, mappedBy="Tricks")
-     */
-    private $pictures;
 
     public function __construct()
     {
@@ -133,36 +129,6 @@ class Tricks
     public function setUsers(?Users $Users): self
     {
         $this->Users = $Users;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Pictures[]
-     */
-    public function getPictures(): Collection
-    {
-        return $this->pictures;
-    }
-
-    public function addPicture(Pictures $picture): self
-    {
-        if (!$this->pictures->contains($picture)) {
-            $this->pictures[] = $picture;
-            $picture->setTricks($this);
-        }
-
-        return $this;
-    }
-
-    public function removePicture(Pictures $picture): self
-    {
-        if ($this->pictures->removeElement($picture)) {
-            // set the owning side to null (unless already changed)
-            if ($picture->getTricks() === $this) {
-                $picture->setTricks(null);
-            }
-        }
 
         return $this;
     }
