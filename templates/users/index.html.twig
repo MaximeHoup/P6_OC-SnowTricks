@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des articles
+{% block title %}Liste des utilisateurs
 {% endblock %}
 
 {% block body %}
-	<h1>Liste des articles</h1>
+	<h1>Liste des utilisateurs</h1>
 	{% for user in users %}
 		<h2>{{ user.id }}</h2>
 		<div>{{ user.username }}</div>

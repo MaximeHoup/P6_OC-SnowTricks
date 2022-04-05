@@ -4,64 +4,128 @@ namespace App\Controller;
 
 use App\Entity\Tricks;
 use App\Entity\Media;
+use App\Entity\Comments;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use App\Form\CommentType;
+use App\Repository\TricksRepository;
+use Symfony\Component\HttpFoundation\Request;
 
 class HomeController extends AbstractController
 {
     /**
      * @Route("/", name="home")
      */
-    public function index(): Response
+    public function index(TricksRepository $trickRepository)
     {
+        $tricks = $trickRepository->findAll();
+
         return $this->render('home/index.html.twig', [
+            'tricks' => $tricks
+        ]);
+    }
+
+    /**
+     * @Route("/trick/{id}", name="show")
+     */
+    public function show($id, Request $request)
+    {
+        $trick = $this->getDoctrine()->getRepository(Tricks::class)->find($id);
+        $comments = $this->getDoctrine()->getRepository(Comments::class)->findAll();
+        $images = $this->getDoctrine()->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
+
+
+        $comment = new Comments();
+        $commentForm = $this->createForm(CommentType::class, $comment);
+        $commentForm->handleRequest($request);
+
+        if ($commentForm->isSubmitted() && $commentForm->isValid()) {
+            $comment->setCreatedAt(new \DateTimeImmutable())
+                ->setUsers($this->getUser())
+                ->setTricks($trick);
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($comment);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('show', [
+                'trick' => $trick,
+                'id' => $id,
+                'images' => $images,
+                'comments' => $comments,
+                'formComment' => $commentForm->createView()
+            ]);
+        }
+
+        return $this->render('home/show.html.twig', [
             'controller_name' => 'HomeController',
+            'trick' => $trick,
+            'images' => $images,
+            'comments' => $comments,
+            'formComment' => $commentForm->createView()
         ]);
     }
 
     /**
      * @Route("/tricks", name="tricks")
      */
-    public function tricks(): Response
+    public function alltricks(TricksRepository $trickRepository)
     {
+        $tricks = $trickRepository->findAll();
+
         return $this->render('home/tricks.html.twig', [
-            'controller_name' => 'HomeController',
+            'tricks' => $tricks
         ]);
     }
 
     /**
      * @Route("/new", name="new")
+     * @Route("/trick/{id}/edit", name="edit")
      */
-    public function newtrick(Request $request)
+    public function tricks(Tricks $trick = null, Request $request)
     {
-        $trick = new Tricks();
+        if (!$trick) {
+            $trick = new Tricks();
+        }
 
-        $form = $this->createFormBuilder($trick)
+        $trickForm = $this->createFormBuilder($trick)
             ->add('name')
             ->add('figure_group')
             ->add('Description')
+            ->add('mainMedia', FileType::class, [
+                'data_class' => null
+            ])
             ->add('media', FileType::class, [
+                'data_class' => null,
                 'mapped' => false,
                 'label' => false,
                 'multiple' => true
             ])
             ->getForm();
 
-        $form->handleRequest($request);
-        dump($trick);
+        $trickForm->handleRequest($request);
 
+        if ($trickForm->isSubmitted() && $trickForm->isValid()) {
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $trick->setCreatedAt(new \DateTimeImmutable());
+            if (!$trick->getId()) {
+                $trick->setCreatedAt(new \DateTimeImmutable());
+            }
             $trick->setModifiedAt(new \DateTimeImmutable());
             $trick->setUsers($this->getUser());
 
+            $mainMediaFile = $trickForm->get('mainMedia')->getData();
+            $mainMedia_uploads_directory = $this->getParameter('main_media_directory');
+            $mainMediaFilename = md5(uniqid()) . '.' . $mainMediaFile->guessExtension();
+            $mainMediaFile->move(
+                $mainMedia_uploads_directory,
+                $mainMediaFilename
+            );
+            $trick->setMainMedia($mainMediaFilename);
+
+
             // On récupère les images transmises
-            $images = $form->get('media')->getData();
+            $images = $trickForm->get('media')->getData();
 
             // On boucle sur les images
             foreach ($images as $image) {
@@ -83,10 +147,31 @@ class HomeController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($trick);
             $entityManager->flush();
+
+            $this->addFlash('success', 'Nouvelle figure ajoutée');
+            return $this->redirectToRoute('show', ['id' => $trick->getId()]);
         }
         return $this->render('home/new.html.twig', [
             'controller_name' => 'HomeController',
-            'formTrick' => $form->createView()
+            'formTrick' => $trickForm->createView(),
+            'editMode' => $trick->getId() !== null
         ]);
+    }
+
+    /**
+     * @Route("/trick/{id}/delete", name="delete")
+     */
+    public function deleteTrick(Tricks $trick = null,  $id)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $trick = $entityManager->getRepository(Tricks::class)->find($id);
+
+        $comments = $entityManager->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()]);
+        foreach ($comments as $comment) {
+            $entityManager->remove($comment);
+        }
+        $entityManager->remove($trick);
+        $entityManager->flush();
+        return $this->redirectToRoute('home');
     }
 }
