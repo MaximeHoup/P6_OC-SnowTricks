@@ -68,14 +68,20 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @Route("/tricks", name="tricks")
+     * @Route("/tricks/{page?1}", name="tricks")
      */
-    public function alltricks(TricksRepository $trickRepository)
+    public function alltricks(TricksRepository $trickRepository, $page)
     {
-        $tricks = $trickRepository->findAll();
+        $trickperpage = 10;
+        $nbtricks = $trickRepository->count([]);
+        $nbpages = ceil(num: $nbtricks / $trickperpage);
+
+        $tricks = $trickRepository->findBy([], ['id' => 'ASC'], limit: $trickperpage, offset: ($page - 1) * $trickperpage);
 
         return $this->render('home/tricks.html.twig', [
-            'tricks' => $tricks
+            'tricks' => $tricks,
+            'nbpages' => $nbpages,
+            'page' => $page
         ]);
     }
 
