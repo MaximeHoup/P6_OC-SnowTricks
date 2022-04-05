@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Tricks;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @method Tricks|null find($id, $lockMode = null, $lockVersion = null)
@@ -17,6 +18,28 @@ class TricksRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Tricks::class);
+    }
+
+    /**
+     * @param int $page
+     * @param int $maxPerPage
+     * @return Paginator
+     */
+    public function findAllForPaginateAndSort($page, $maxPerPage)
+    {
+        if ($page <= 1) {
+            $page = 1;
+        }
+
+        $trickResults = ($page * $maxPerPage) - $maxPerPage;
+
+        $query = $this->createQueryBuilder('t')
+            ->setFirstResult($trickResults)
+            ->setMaxResults($maxPerPage);
+
+        $pagination = new Paginator($query);
+
+        return $pagination;
     }
 
     // /**

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CommentsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=CommentsRepository::class)
@@ -19,6 +20,8 @@ class Comments
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\Length(min=3,
+     * minMessage="Votre message doit contenir au moins 3 caractères")
      */
     private $Content;
 
@@ -32,6 +35,12 @@ class Comments
      * @ORM\JoinColumn(nullable=false)
      */
     private $Users;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Tricks::class, inversedBy="comments")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $Tricks;
 
     public function getId(): ?int
     {
@@ -70,6 +79,18 @@ class Comments
     public function setUsers(?Users $Users): self
     {
         $this->Users = $Users;
+
+        return $this;
+    }
+
+    public function getTricks(): ?Tricks
+    {
+        return $this->Tricks;
+    }
+
+    public function setTricks(?Tricks $Tricks): self
+    {
+        $this->Tricks = $Tricks;
 
         return $this;
     }

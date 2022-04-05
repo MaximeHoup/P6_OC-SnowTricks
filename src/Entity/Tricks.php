@@ -6,6 +6,7 @@ use App\Repository\TricksRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TricksRepository::class)
@@ -20,7 +21,7 @@ class Tricks
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $Name;
 
@@ -51,15 +52,26 @@ class Tricks
     private $Users;
 
     /**
-     * @ORM\OneToMany(targetEntity=Media::class, mappedBy="tricks", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=Media::class, mappedBy="tricks", cascade={"persist"}, orphanRemoval=true)
      */
     private $media;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $mainMedia;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Comments::class, mappedBy="Tricks", orphanRemoval=true)
+     */
+    private $comments;
 
 
     public function __construct()
     {
         $this->pictures = new ArrayCollection();
         $this->media = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,6 +175,48 @@ class Tricks
             // set the owning side to null (unless already changed)
             if ($medium->getTricks() === $this) {
                 $medium->setTricks(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getMainMedia(): ?string
+    {
+        return $this->mainMedia;
+    }
+
+    public function setMainMedia(string $mainMedia): self
+    {
+        $this->mainMedia = $mainMedia;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comments>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comments $comment): self
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments[] = $comment;
+            $comment->setTricks($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comments $comment): self
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getTricks() === $this) {
+                $comment->setTricks(null);
             }
         }
 

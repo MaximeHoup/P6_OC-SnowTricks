@@ -1,17 +1,29 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-	<h1 class="text-center mt-5">Ajouter un nouveau trick</h1>
+	{% if editMode %}
+		<h1 class="text-center mt-5">Modifier une figure</h1>
+	{% else %}
+		<h1 class="text-center mt-5">Ajouter une nouvelle figure</h1>
+	{% endif %}
+
 
 	{{ form_start(formTrick) }}
 
 	{{ form_row(formTrick.name, {'attr': {'placeholder': "Nom de la figure"}}) }}
 	{{ form_row(formTrick.figure_group, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}
 	{{ form_row(formTrick.Description, {'attr': {'placeholder': "Description de la figure"}}) }}
+	{{ form_row(formTrick.mainMedia) }}
 	{{ form_row(formTrick.media) }}
 
 
-	<button type="submit" class="btn btn-success">Ajouter la figure</button>
+	<button type="submit" class="btn btn-success">
+		{% if editMode %}
+			Enregistrer les modifications
+		{% else %}
+			Ajouter la figure
+		{% endif %}
+	</button>
 
 	{{ form_end(formTrick) }}
 

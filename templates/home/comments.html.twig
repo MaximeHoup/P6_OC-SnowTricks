@@ -1,0 +1,16 @@
+{% block comments %}
+	<h1 class="text-center">Commentaires</h1>
+	<div class="col">
+		{% for comment in comments |sort((a, b) => b.createdAt <=> a.createdAt) %}
+			<div><img src="{{ asset('uploads/avatars/' ~ comment.Users.Photo) }}">
+				{{ comment.Users.username}}
+				le
+				{{ comment.CreatedAt | date('d/m/Y') }}
+				à
+				{{ comment.CreatedAt | date('H:i') }}:
+				{{ comment.content | raw }}</div>
+
+
+			-------------------------------------------</br>
+	{% endfor %}
+</div>{% endblock %}
