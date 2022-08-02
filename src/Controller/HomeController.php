@@ -5,12 +5,24 @@ namespace App\Controller;
 use App\Entity\Tricks;
 use App\Entity\Media;
 use App\Entity\Comments;
+use App\Entity\FigureGroup;
+use App\Entity\Videos;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\Form\CommentType;
+use App\Repository\CommentsRepository;
 use App\Repository\TricksRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Unique;
 
 class HomeController extends AbstractController
 {
@@ -27,18 +39,25 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @Route("/trick/{id}", name="show")
+     * @Route("/trick/{id}-{name}/{page?1}", name="show",requirements={"name": ".+"})
      */
-    public function show($id, Request $request)
+    public function show($id, $name, $page, CommentsRepository $commentsRepository, Request $request)
     {
         $trick = $this->getDoctrine()->getRepository(Tricks::class)->find($id);
-        $comments = $this->getDoctrine()->getRepository(Comments::class)->findAll();
+        $name = $this->getDoctrine()->getRepository(Tricks::class)->find($name);
         $images = $this->getDoctrine()->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
-
+        $videos = $this->getDoctrine()->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
+        $figureGroup = $this->getDoctrine()->getRepository(FigureGroup::class)->find($id);
 
         $comment = new Comments();
         $commentForm = $this->createForm(CommentType::class, $comment);
         $commentForm->handleRequest($request);
+
+        $commentsperpage = 10;
+        $nbcomments = $commentsRepository->count([]);
+        (int)$nbpages = ceil(num: $nbcomments / $commentsperpage);
+        $comments = $this->getDoctrine()->getRepository(Comments::class)->findBy([], ['id' => 'DESC'], limit: $commentsperpage, offset: ($page - 1) * $commentsperpage);
+
 
         if ($commentForm->isSubmitted() && $commentForm->isValid()) {
             $comment->setCreatedAt(new \DateTimeImmutable())
@@ -53,7 +72,12 @@ class HomeController extends AbstractController
                 'trick' => $trick,
                 'id' => $id,
                 'images' => $images,
+                'figureGroup' => $figureGroup,
+                'videos' => $videos,
                 'comments' => $comments,
+                'nbpages' => $nbpages,
+                'page' => $page,
+                'name' => $name,
                 'formComment' => $commentForm->createView()
             ]);
         }
@@ -61,8 +85,14 @@ class HomeController extends AbstractController
         return $this->render('home/show.html.twig', [
             'controller_name' => 'HomeController',
             'trick' => $trick,
+            'id' => $id,
             'images' => $images,
+            'figureGroup' => $figureGroup,
+            'videos' => $videos,
             'comments' => $comments,
+            'nbpages' => $nbpages,
+            'page' => $page,
+            'name' => $name,
             'formComment' => $commentForm->createView()
         ]);
     }
@@ -87,7 +117,7 @@ class HomeController extends AbstractController
 
     /**
      * @Route("/new", name="new")
-     * @Route("/trick/{id}/edit", name="edit")
+     * @Route("/trick/{name}/edit", name="edit")
      */
     public function tricks(Tricks $trick = null, Request $request)
     {
@@ -97,7 +127,10 @@ class HomeController extends AbstractController
 
         $trickForm = $this->createFormBuilder($trick)
             ->add('name')
-            ->add('figure_group')
+            ->add('figureGroup', EntityType::class, [
+                'class' => FigureGroup::class,
+                'choice_label' => 'name',
+            ])
             ->add('Description')
             ->add('mainMedia', FileType::class, [
                 'data_class' => null
@@ -107,6 +140,9 @@ class HomeController extends AbstractController
                 'mapped' => false,
                 'label' => false,
                 'multiple' => true
+            ])
+            ->add('video', UrlType::class, [
+                'mapped' => false
             ])
             ->getForm();
 
@@ -150,12 +186,21 @@ class HomeController extends AbstractController
                 $trick->addMedium($img);
             }
 
+            // On récupère les vidéos transmises
+            $video = $trickForm->get('video')->getData();
+
+            // On crée la source
+            $vid = new Videos();
+            $vid->setsource($video);
+            $trick->addVideos($vid);
+
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($trick);
             $entityManager->flush();
 
             $this->addFlash('success', 'Nouvelle figure ajoutée');
-            return $this->redirectToRoute('show', ['id' => $trick->getId()]);
+            return $this->redirectToRoute('tricks');
         }
         return $this->render('home/new.html.twig', [
             'controller_name' => 'HomeController',
@@ -165,12 +210,12 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @Route("/trick/{id}/delete", name="delete")
+     * @Route("/trick/{name}/delete", name="delete")
      */
-    public function deleteTrick(Tricks $trick = null,  $id)
+    public function deleteTrick(Tricks $trick = null,  $name)
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $trick = $entityManager->getRepository(Tricks::class)->find($id);
+        $trick = $entityManager->getRepository(Tricks::class)->find($name);
 
         $comments = $entityManager->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()]);
         foreach ($comments as $comment) {

@@ -5,11 +5,13 @@ namespace App\Entity;
 use App\Repository\TricksRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TricksRepository::class)
+ * @UniqueEntity(fields="Name", message="Cette figure existe déjà.")
  */
 class Tricks
 {
@@ -22,18 +24,20 @@ class Tricks
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
+     * @Assert\Length(min=3, max=30, 
+     * minMessage="Votre pseudo doit contenir au moins 3 caractères.",
+     * maxMessage="Votre pseudo ne peut contenir plus de 30 caractères.")
      */
     private $Name;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
+     * @Assert\Length(min=10, 
+     * minMessage="La description doit contenir au moins 10 caractères")
      */
     private $Description;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $FigureGroup;
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -58,6 +62,7 @@ class Tricks
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
      */
     private $mainMedia;
 
@@ -66,12 +71,24 @@ class Tricks
      */
     private $comments;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=FigureGroup::class, inversedBy="trick", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $figureGroup;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Videos::class, mappedBy="trick", cascade={"persist"}, orphanRemoval=true)
+     */
+    private $videos;
+
 
     public function __construct()
     {
         $this->pictures = new ArrayCollection();
         $this->media = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->videos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -99,18 +116,6 @@ class Tricks
     public function setDescription(string $Description): self
     {
         $this->Description = $Description;
-
-        return $this;
-    }
-
-    public function getFigureGroup(): ?string
-    {
-        return $this->FigureGroup;
-    }
-
-    public function setFigureGroup(string $FigureGroup): self
-    {
-        $this->FigureGroup = $FigureGroup;
 
         return $this;
     }
@@ -217,6 +222,48 @@ class Tricks
             // set the owning side to null (unless already changed)
             if ($comment->getTricks() === $this) {
                 $comment->setTricks(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFigureGroup(): ?FigureGroup
+    {
+        return $this->figureGroup;
+    }
+
+    public function setFigureGroup(?FigureGroup $figureGroup): self
+    {
+        $this->figureGroup = $figureGroup;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Videos>
+     */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
+    }
+
+    public function addVideos(Videos $videos): self
+    {
+        if (!$this->videos->contains($videos)) {
+            $this->videos[] = $videos;
+            $videos->setTrick($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVideos(Videos $videos): self
+    {
+        if ($this->videos->removeElement($videos)) {
+            // set the owning side to null (unless already changed)
+            if ($videos->getTrick() === $this) {
+                $videos->setTrick(null);
             }
         }
 

@@ -10,11 +10,13 @@
 
 	{{ form_start(formTrick) }}
 
+	{{ form_errors(formTrick) }}
 	{{ form_row(formTrick.name, {'attr': {'placeholder': "Nom de la figure"}}) }}
-	{{ form_row(formTrick.figure_group, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}
+	{{ form_row(formTrick.figureGroup, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}
 	{{ form_row(formTrick.Description, {'attr': {'placeholder': "Description de la figure"}}) }}
-	{{ form_row(formTrick.mainMedia) }}
-	{{ form_row(formTrick.media) }}
+	{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Image principale"}}) }}
+	{{ form_row(formTrick.media, {'attr': {'placeholder': "Ajouter d'autres images"}}) }}
+	{{ form_row(formTrick.video, {'attr': {'placeholder': "Ajouter l'url d'une vidéo"}}) }}
 
 
 	<button type="submit" class="btn btn-success">

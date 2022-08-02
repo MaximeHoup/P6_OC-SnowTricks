@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Comments;
+use App\Entity\FigureGroup;
 use App\Entity\Media;
 use App\Entity\Tricks;
 use App\Entity\Users;
@@ -14,33 +15,42 @@ class TricksFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        for ($h = 1; $h <= 2; $h++) {
+            $group = new FigureGroup();
+            $group->setName("Groupe $h");
+        }
+
         for ($i = 1; $i <= 2; $i++) {
             $user = new Users();
             $user->setUsername("user $i")
                 ->setEmail("user$i@gmail.com")
                 ->setPassword("passworduser$i")
-                ->setPhoto("{{ asset('uploads/avatars/defaultuser.jpg') }}");
+                ->setPhoto("defaultuser.jpg");
 
             $manager->persist($user);
 
 
             for ($j = 1; $j <= 6; $j++) {
                 $img = new Media();
-                $img->setSource("{{ asset('uploads/tricks/fixtures2.jpg') }}");
+                $img->setSource("fixtures2.jpg");
+
+                $img2 = new Media();
+                $img2->setSource("fixtures1.jpg");
 
                 $trick = new Tricks();
                 $trick->setName("Figure $j, ajoutée par l'utilisateur $i")
-                    ->setFigureGroup("Grab")
+                    ->setFigureGroup($group)
                     ->setDescription("Description de la figure n°$j")
-                    ->setMainMedia("{{ asset('uploads/mainmediatricks/fixtures1.jpg') }}")
+                    ->setMainMedia("fixtures1.jpg")
                     ->addMedium($img)
+                    ->addMedium($img2)
                     ->setCreatedAt(new \DateTimeImmutable())
                     ->setModifiedAt(new \DateTimeImmutable())
                     ->setUsers($user);
 
                 $manager->persist($trick);
 
-                for ($k = 1; $k <= 3; $k++) {
+                for ($k = 1; $k <= 2; $k++) {
                     $comment = new Comments();
                     $comment->setUsers($user)
                         ->setTricks($trick)

@@ -48,11 +48,13 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
      */
     private $Photo;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
      * @Assert\Email(message = "Veillez renseigner un email valide")
      */
     private $Email;
