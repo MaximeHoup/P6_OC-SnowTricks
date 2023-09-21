@@ -62,7 +62,6 @@ class Tricks
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
      */
     private $mainMedia;
 
@@ -85,7 +84,6 @@ class Tricks
 
     public function __construct()
     {
-        $this->pictures = new ArrayCollection();
         $this->media = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->videos = new ArrayCollection();
@@ -191,7 +189,7 @@ class Tricks
         return $this->mainMedia;
     }
 
-    public function setMainMedia(string $mainMedia): self
+    public function setMainMedia(?string $mainMedia): self
     {
         $this->mainMedia = $mainMedia;
 

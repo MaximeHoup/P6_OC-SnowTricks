@@ -15,14 +15,7 @@ use App\Form\CommentType;
 use App\Repository\CommentsRepository;
 use App\Repository\TricksRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Unique;
 
 class HomeController extends AbstractController
 {
@@ -31,7 +24,7 @@ class HomeController extends AbstractController
      */
     public function index(TricksRepository $trickRepository)
     {
-        $tricks = $trickRepository->findAll();
+        $tricks = $trickRepository->findBy([], ['Created_at' => 'DESC'], limit: 15);
 
         return $this->render('home/index.html.twig', [
             'tricks' => $tricks
@@ -56,7 +49,7 @@ class HomeController extends AbstractController
         $commentsperpage = 10;
         $nbcomments = $commentsRepository->count([]);
         (int)$nbpages = ceil(num: $nbcomments / $commentsperpage);
-        $comments = $this->getDoctrine()->getRepository(Comments::class)->findBy([], ['id' => 'DESC'], limit: $commentsperpage, offset: ($page - 1) * $commentsperpage);
+        $comments = $this->getDoctrine()->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()], ['id' => 'DESC'], limit: $commentsperpage, offset: ($page - 1) * $commentsperpage);
 
 
         if ($commentForm->isSubmitted() && $commentForm->isValid()) {
@@ -117,12 +110,20 @@ class HomeController extends AbstractController
 
     /**
      * @Route("/new", name="new")
-     * @Route("/trick/{name}/edit", name="edit")
+     * @Route("/trick/{id}/edit", name="edit")
      */
-    public function tricks(Tricks $trick = null, Request $request)
+    public function tricks(Tricks $trick = null, Media $images = null, Videos $videos = null, Request $request)
     {
         if (!$trick) {
             $trick = new Tricks();
+        }
+
+        if (!$images) {
+            $images = $this->getDoctrine()->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
+        }
+
+        if (!$videos) {
+            $videos = $this->getDoctrine()->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
         }
 
         $trickForm = $this->createFormBuilder($trick)
@@ -133,16 +134,21 @@ class HomeController extends AbstractController
             ])
             ->add('Description')
             ->add('mainMedia', FileType::class, [
-                'data_class' => null
+                'data_class' => null,
+                'mapped' => false,
+                'label' => false,
+                'required' => false
             ])
             ->add('media', FileType::class, [
                 'data_class' => null,
                 'mapped' => false,
                 'label' => false,
-                'multiple' => true
+                'multiple' => true,
+                'required' => false
             ])
-            ->add('video', UrlType::class, [
-                'mapped' => false
+            ->add('video', TextType::class, [
+                'mapped' => false,
+                'required' => false
             ])
             ->getForm();
 
@@ -158,12 +164,18 @@ class HomeController extends AbstractController
 
             $mainMediaFile = $trickForm->get('mainMedia')->getData();
             $mainMedia_uploads_directory = $this->getParameter('main_media_directory');
-            $mainMediaFilename = md5(uniqid()) . '.' . $mainMediaFile->guessExtension();
-            $mainMediaFile->move(
-                $mainMedia_uploads_directory,
-                $mainMediaFilename
-            );
-            $trick->setMainMedia($mainMediaFilename);
+
+            if (!$mainMediaFile) {
+                $mainMediaFilename = "DefaultMainTrick.jpg";
+                $trick->setMainMedia($mainMediaFilename);
+            } else {
+                $mainMediaFilename = md5(uniqid()) . '.' . $mainMediaFile->guessExtension();
+                $mainMediaFile->move(
+                    $mainMedia_uploads_directory,
+                    $mainMediaFilename
+                );
+                $trick->setMainMedia($mainMediaFilename);
+            }
 
 
             // On récupère les images transmises
@@ -190,32 +202,40 @@ class HomeController extends AbstractController
             $video = $trickForm->get('video')->getData();
 
             // On crée la source
-            $vid = new Videos();
-            $vid->setsource($video);
-            $trick->addVideos($vid);
+            if (!empty($video)) {
+                $vid = new Videos();
+                $vid->setsource($video);
+                $trick->addVideos($vid);
+            }
 
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($trick);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Nouvelle figure ajoutée');
+            if ($trick->getId() !== null) {
+                $this->addFlash('success', 'Modification effectuée');
+            } else {
+                $this->addFlash('success', 'Nouvelle figure ajoutée');
+            }
             return $this->redirectToRoute('tricks');
         }
         return $this->render('home/new.html.twig', [
             'controller_name' => 'HomeController',
-            'formTrick' => $trickForm->createView(),
-            'editMode' => $trick->getId() !== null
+            'editMode' => $trick->getId() !== null,
+            'images' => $images,
+            'videos' => $videos,
+            'formTrick' => $trickForm->createView()
         ]);
     }
 
     /**
-     * @Route("/trick/{name}/delete", name="delete")
+     * @Route("/trick/{id}/delete", name="delete")
      */
-    public function deleteTrick(Tricks $trick = null,  $name)
+    public function deleteTrick(Tricks $trick = null,  $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $trick = $entityManager->getRepository(Tricks::class)->find($name);
+        $trick = $entityManager->getRepository(Tricks::class)->find($id);
 
         $comments = $entityManager->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()]);
         foreach ($comments as $comment) {
@@ -223,6 +243,30 @@ class HomeController extends AbstractController
         }
         $entityManager->remove($trick);
         $entityManager->flush();
-        return $this->redirectToRoute('home');
+        return $this->redirectToRoute('tricks');
+    }
+
+    /**
+     * @Route("/media/{id}/delete", name="deleteimg")
+     */
+    public function deleteImage(Media $media = null, $id)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $media = $entityManager->getRepository(Media::class)->find($id);
+        $entityManager->remove($media);
+        $entityManager->flush();
+        return $this->redirectToRoute('tricks');
+    }
+
+    /**
+     * @Route("/video/{id}/delete", name="deletevideo")
+     */
+    public function deleteVideo(Videos $video = null,  $id)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $video = $entityManager->getRepository(Videos::class)->find($id);
+        $entityManager->remove($video);
+        $entityManager->flush();
+        return $this->redirectToRoute('tricks');
     }
 }
