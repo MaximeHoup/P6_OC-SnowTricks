@@ -48,7 +48,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Ce champ ne peut être vide.")
      */
     private $Photo;
 
@@ -68,6 +67,11 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\OneToMany(targetEntity=Comments::class, mappedBy="Users", orphanRemoval=true)
      */
     private $comments;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $is_verified = false;
 
     public function __construct()
     {
@@ -159,12 +163,12 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getPhoto()
+    public function getPhoto(): ?string
     {
         return $this->Photo;
     }
 
-    public function setPhoto($Photo): self
+    public function setPhoto(?string $Photo): self
     {
         $this->Photo = $Photo;
 
@@ -239,6 +243,18 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
                 $comment->setUsers(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getIsVerified(): ?bool
+    {
+        return $this->is_verified;
+    }
+
+    public function setIsVerified(bool $is_verified): self
+    {
+        $this->is_verified = $is_verified;
 
         return $this;
     }

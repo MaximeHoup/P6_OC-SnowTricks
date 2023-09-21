@@ -1,6 +1,6 @@
 #hero {
     width: 100%;
-    align-items:center;
+    align-items: center;
     position: relative;
 }
 
@@ -8,28 +8,15 @@ body {
     background-color: #DCD5D4;
 }
 
-.div {
-    background-color: #FFFFFF;
-}
-
-.card {
-   width: 220px;
-   height: 270px;
-}
-
-#pagination {
-    justify-content: center;
-}
-
-#down {
-    font-size: 5em;
+.down {
+    font-size: 4rem;
     position: absolute;
     bottom: 0;
     right: 0;
 }
 
-#up {
-    font-size: 5em;
+.up {
+    font-size: 4rem;
     float: right;
     margin-top: -100px;
 }
