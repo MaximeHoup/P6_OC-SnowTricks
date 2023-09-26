@@ -32,7 +32,7 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @Route("/trick/{id}-{name}/{page?1}", name="show",requirements={"name": ".+"})
+     * @Route("/trick/{id}-{name}/{page?1}", name="show")
      */
     public function show($id, $name, $page, CommentsRepository $commentsRepository, Request $request)
     {
@@ -61,7 +61,7 @@ class HomeController extends AbstractController
             $entityManager->persist($comment);
             $entityManager->flush();
 
-            return $this->redirectToRoute('show', [
+            return $this->redirectToRoute('tricks', [
                 'trick' => $trick,
                 'id' => $id,
                 'images' => $images,
@@ -127,10 +127,13 @@ class HomeController extends AbstractController
         }
 
         $trickForm = $this->createFormBuilder($trick)
-            ->add('name')
+            ->add('name', TextType::class, [
+                'label' => 'Nom'
+            ])
             ->add('figureGroup', EntityType::class, [
                 'class' => FigureGroup::class,
                 'choice_label' => 'name',
+                'label' => 'Groupe auquel appartient la figure'
             ])
             ->add('Description')
             ->add('mainMedia', FileType::class, [
@@ -148,7 +151,8 @@ class HomeController extends AbstractController
             ])
             ->add('video', TextType::class, [
                 'mapped' => false,
-                'required' => false
+                'required' => false,
+                'label' => 'Vidéo'
             ])
             ->getForm();
 
