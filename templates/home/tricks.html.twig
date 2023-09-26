@@ -13,7 +13,7 @@
 				<div class="col col-lg-2 col-md-5 mx-3 px-1">
 					<div class="card text-center mt-2 mb-3 border border-dark">
 						<div class="card-body">
-							<img class="card-img-top" src="{{ asset('uploads/mainmediatricks/' ~ trick.mainMedia) }}" style="height: 10rem">
+							<img class="card-img-top" src="{{ asset('uploads/mainmediatricks/' ~ trick.mainMedia) }}" style="height:12rem; width:11rem">
 							<h2 class="card-title mt-2">
 								<a href="{{ path('show', {'id': trick.id , 'name': trick.name}) }}">{{ trick.name }}</a>
 								{% if app.user %}

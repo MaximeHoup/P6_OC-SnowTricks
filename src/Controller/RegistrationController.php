@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Users;
-use App\Service\Mailer;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use App\Service\SendMailService;
 use App\Service\JWTService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,9 +10,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -22,10 +21,6 @@ class RegistrationController extends AbstractController
 {
 
 
-    /**
-     * @var Mailer
-     */
-    private $mailer;
 
     /**
      * @Route("/signup", name="signup")
@@ -35,18 +30,23 @@ class RegistrationController extends AbstractController
         $user = new Users();
 
         $form = $this->createFormBuilder($user)
-            ->add('username')
-            ->add('Email')
-            ->add('password')
+            ->add('username', TextType::class, [
+                'label' => 'Nom d\'utilisateur'
+            ])
+            ->add('Email', EmailType::class)
+            ->add('password', PasswordType::class, [
+                'label' => 'Entrez votre mot de passe'
+            ])
             ->add('Photo', FileType::class, [
-                'required' => false
+                'required' => false,
+                'label' => 'Photo de profil'
             ])
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
+            // encodage du mot de passe
             $user->setPassword(
                 $userPasswordHasher->hashPassword(
                     $user,
@@ -96,9 +96,6 @@ class RegistrationController extends AbstractController
                 'registration',
                 compact('user', 'token')
             );
-
-
-
 
             $this->addFlash('success', 'Votre compte a bien été créé');
 

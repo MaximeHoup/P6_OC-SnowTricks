@@ -1,86 +1,92 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-	{% if editMode %}
-		<h1 class="text-center mt-5">Modifier la figure</h1>
-	{% else %}
-		<h1 class="text-center mt-5">Ajouter une nouvelle figure</h1>
-	{% endif %}
-	<div class="col" id="form">
-		{{ form_start(formTrick) }}
-		{{ form_errors(formTrick) }}
-		{{ form_row(formTrick.name, {'attr': {'placeholder': "Nom de la figure"}}) }}
-		{{ form_row(formTrick.figureGroup, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}
-		{{ form_row(formTrick.Description, {'attr': {'placeholder': "Description de la figure"}}) }}
-		{% if editMode %}
-			{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Changer l'image principale"}}) }}
-		{% else %}
-			{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Image principale"}}) }}
-		{% endif %}
-		{{ form_row(formTrick.media, {'attr': {'placeholder': "Ajouter d'autres images"}}) }}
-		{{ form_row(formTrick.video, {'attr': {'placeholder': "Ajouter l'url d'une vidéo"}}) }}
-
-		{% if editMode %}
-
-			<div class="row text-center">
-				<hr>
-				<h5>
-					Gestion des médias
-				</h5>
-				<hr>
-				<p>Ici, vous pouvez supprimer les photos et/ou vidéos présentes sur la page de cette figure. Toute suppression est définitive.</p>
-				<br>
-				{% for image in images %}
-					<div class="col-5 col-md-2 mx-3 px-1">
-						<div class="card-deck">
-							<div class="card">
-								<img class="card-img-top mx-auto" src="{{ asset('uploads/tricks/' ~ image.source) }}" alt="Image" style="height: 15rem; width:15rem">
-								<div class="card-footer">
-									<a href="{{ path('deleteimg', {'id': image.id}) }}" onclick="return confirm('Confirmer la suppression ? Cette action est irréversible.');" style="text-decoration:none">
-										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewbox="0 0 16 16">
-											<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-											<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-										</svg>
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				{% endfor %}
-				<hr class="mt-2">
-				{% for video in videos %}
-					<div class="col mx-auto mt-3">
-						<div class="card-deck">
-							<div class="card bg-dark">
-								<div class="card-body playsinline">
-									{{video.source | raw}}
-								</div>
-								<div class="card-footer bg-light">
-									<a href="{{ path('deletevideo', {'id': video.id}) }}" onclick="return confirm('Confirmer la suppression ? Cette action est irréversible.');" style="text-decoration:none">
-										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewbox="0 0 16 16">
-											<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-											<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-										</svg>
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				{% endfor %}
-			</div>
-			<br>
-			<div class="row text-center">
-				<div class="col">
-
-
-					<button type="submit" class="btn btn-success">
-						Enregister les modifications
-					</button>
+	<section class="container my-3">
+		<div class="row">
+			<div class="col">
+				{% if editMode %}
+					<h1 class="text-center">Modifier la figure</h1>
 				{% else %}
-					<button type="submit" class="btn btn-success">
-						Ajouter la figure
-					</button>
+					<h1 class="text-center">Ajouter une nouvelle figure</h1>
 				{% endif %}
-				{{ form_end(formTrick) }}
-			</div>
+				<div class="col" id="form">
+					{{ form_start(formTrick) }}
+					{{ form_errors(formTrick) }}
+					{{ form_row(formTrick.name, {'attr': {'placeholder': "Nom de la figure"}}) }}
+					{{ form_row(formTrick.figureGroup, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}
+					{{ form_row(formTrick.Description, {'attr': {'placeholder': "Description de la figure"}}) }}
+					{% if editMode %}
+						{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Changer l'image principale"}}) }}
+					{% else %}
+						{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Image principale"}}) }}
+					{% endif %}
+					{{ form_row(formTrick.media, {'attr': {'placeholder': "Ajouter d'autres images"}}) }}
+					{{ form_row(formTrick.video, {'attr': {'placeholder': "Ajouter l'url d'une vidéo"}}) }}
+
+					{% if editMode %}
+
+						<div class="row text-center">
+							<hr>
+							<h5>
+								Gestion des médias
+							</h5>
+							<hr>
+							<p>Ici, vous pouvez supprimer les photos et/ou vidéos présentes sur la page de cette figure. Toute suppression est définitive.</p>
+							<br>
+							{% for image in images %}
+								<div class="col-5 col-md-2 mx-3 px-1">
+									<div class="card-deck">
+										<div class="card bg-dark mb-3">
+											<img class="card-body" src="{{ asset('uploads/tricks/' ~ image.source) }}" alt="Image" style="height: 12rem">
+											<div class="card-footer bg-light">
+												<a href="{{ path('deleteimg', {'id': image.id}) }}" onclick="return confirm('Confirmer la suppression ? Cette action est irréversible.');" style="text-decoration:none">
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewbox="0 0 16 16">
+														<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+														<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+													</svg>
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+							<hr class="mt-2">
+							{% for video in videos %}
+								<div class="col mx-auto mt-3">
+									<div class="card-deck">
+										<div class="card bg-dark">
+											<div class="card-body playsinline">
+												{{video.source | raw}}
+											</div>
+											<div class="card-footer bg-light">
+												<a href="{{ path('deletevideo', {'id': video.id}) }}" onclick="return confirm('Confirmer la suppression ? Cette action est irréversible.');" style="text-decoration:none">
+													<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewbox="0 0 16 16">
+														<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+														<path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+													</svg>
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						</div>
+						<br>
+						<div class="row text-center">
+							<div class="col">
+
+
+								<button type="submit" class="btn btn-success">
+									Enregister les modifications
+								</button>
+							{% else %}
+								<button type="submit" class="btn btn-success">
+									Ajouter la figure
+								</button>
+							{% endif %}
+							{{ form_end(formTrick) }}
+						</div>
+					</div>
+				</div>
+			</section>
 		{% endblock %}
