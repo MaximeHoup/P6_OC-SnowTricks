@@ -29,6 +29,12 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
         $this->urlGenerator = $urlGenerator;
     }
 
+    public function supports(Request $request): bool
+    {
+        return self::LOGIN_ROUTE === $request->attributes->get('_route')
+            && $request->isMethod('POST');
+    }
+
     public function authenticate(Request $request): PassportInterface
     {
         $username = $request->request->get('username', '');
