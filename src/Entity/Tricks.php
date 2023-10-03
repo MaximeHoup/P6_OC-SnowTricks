@@ -81,6 +81,11 @@ class Tricks
      */
     private $videos;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $Slug;
+
 
     public function __construct()
     {
@@ -150,6 +155,18 @@ class Tricks
     public function setUsers(?Users $Users): self
     {
         $this->Users = $Users;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->Slug;
+    }
+
+    public function setSlug(string $Slug): self
+    {
+        $this->Slug = $Slug;
 
         return $this;
     }

@@ -11,7 +11,6 @@ use App\Form\ResetPasswordRequestFormType;
 use App\Repository\UsersRepository;
 use App\Service\SendMailService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Email;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -59,10 +58,8 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //On va chercher l'utilisateur par son email
             $user = $usersRepository->findOneBy(['Email' => $form->get('Email')->getData()]);
 
-            // On vérifie si on a un utilisateur
             if ($user) {
                 // On génère un token de réinitialisation
                 $token = $tokenGenerator->generateToken();
@@ -76,7 +73,6 @@ class SecurityController extends AbstractController
                 // On crée les données du mail
                 $context = compact('url', 'user');
 
-                // Envoi du mail
                 $mail->send(
                     'no-reply@snowtricks.fr',
                     $user->getEmail(),
@@ -136,7 +132,7 @@ class SecurityController extends AbstractController
                 'passForm' => $form->createView()
             ]);
         }
-        $this->addFlash('danger', 'Jeton invalide');
+        $this->addFlash('danger', 'Token invalide');
         return $this->redirectToRoute('app_login');
     }
 }
