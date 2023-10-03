@@ -9,14 +9,13 @@ use App\Entity\FigureGroup;
 use App\Entity\Videos;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use App\Form\CommentType;
+use App\Form\CommentFormType;
+use App\Form\TrickFormType;
 use App\Repository\CommentsRepository;
 use App\Repository\TricksRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class HomeController extends AbstractController
 {
@@ -38,18 +37,18 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @Route("/trick/{id}-{name}/{page?1}", name="show")
+     * @Route("/trick/{id}/{slug}/{page?1}", name="show")
      */
-    public function show($id, $name, $page, CommentsRepository $commentsRepository, Request $request)
+    public function show($id, $slug, $page, CommentsRepository $commentsRepository, Request $request)
     {
         $trick = $this->getDoctrine->getRepository(Tricks::class)->find($id);
-        $name = $this->getDoctrine->getRepository(Tricks::class)->find($name);
+        $slug = $this->getDoctrine->getRepository(Tricks::class)->find($slug);
         $images = $this->getDoctrine->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
         $videos = $this->getDoctrine->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
         $figureGroup = $this->getDoctrine->getRepository(FigureGroup::class)->find($id);
 
         $comment = new Comments();
-        $commentForm = $this->createForm(CommentType::class, $comment);
+        $commentForm = $this->createForm(CommentFormType::class, $comment);
         $commentForm->handleRequest($request);
 
         $commentsperpage = 10;
@@ -76,7 +75,7 @@ class HomeController extends AbstractController
                 'comments' => $comments,
                 'nbpages' => $nbpages,
                 'page' => $page,
-                'name' => $name,
+                'slug' => $slug,
                 'formComment' => $commentForm->createView()
             ]);
         }
@@ -91,7 +90,7 @@ class HomeController extends AbstractController
             'comments' => $comments,
             'nbpages' => $nbpages,
             'page' => $page,
-            'name' => $name,
+            'slug' => $slug,
             'formComment' => $commentForm->createView()
         ]);
     }
@@ -132,36 +131,7 @@ class HomeController extends AbstractController
             $videos = $this->getDoctrine->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
         }
 
-        $trickForm = $this->createFormBuilder($trick)
-            ->add('name', TextType::class, [
-                'label' => 'Nom'
-            ])
-            ->add('figureGroup', EntityType::class, [
-                'class' => FigureGroup::class,
-                'choice_label' => 'name',
-                'label' => 'Groupe auquel appartient la figure'
-            ])
-            ->add('Description')
-            ->add('mainMedia', FileType::class, [
-                'data_class' => null,
-                'mapped' => false,
-                'label' => false,
-                'required' => false
-            ])
-            ->add('media', FileType::class, [
-                'data_class' => null,
-                'mapped' => false,
-                'label' => false,
-                'multiple' => true,
-                'required' => false
-            ])
-            ->add('video', TextType::class, [
-                'mapped' => false,
-                'required' => false,
-                'label' => 'Vidéo'
-            ])
-            ->getForm();
-
+        $trickForm = $this->createForm(TrickFormType::class, $trick);
         $trickForm->handleRequest($request);
 
         if ($trickForm->isSubmitted() && $trickForm->isValid()) {
@@ -169,6 +139,11 @@ class HomeController extends AbstractController
             if (!$trick->getId()) {
                 $trick->setCreatedAt(new \DateTimeImmutable());
             }
+
+            $slugger = new AsciiSlugger();
+            $slug = $slugger->slug($trick->getName());
+            $trick->setSlug($slug);
+
             $trick->setModifiedAt(new \DateTimeImmutable());
             $trick->setUsers($this->getUser());
 
