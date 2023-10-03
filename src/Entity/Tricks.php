@@ -25,7 +25,7 @@ class Tricks
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Assert\NotBlank(message="Ce champ ne peut être vide.")
-     * @Assert\Length(min=3, max=30, 
+     * @Assert\Length(min=3, max=30,
      * minMessage="Votre pseudo doit contenir au moins 3 caractères.",
      * maxMessage="Votre pseudo ne peut contenir plus de 30 caractères.")
      */
@@ -34,7 +34,7 @@ class Tricks
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank(message="Ce champ ne peut être vide.")
-     * @Assert\Length(min=10, 
+     * @Assert\Length(min=10,
      * minMessage="La description doit contenir au moins 10 caractères")
      */
     private $Description;

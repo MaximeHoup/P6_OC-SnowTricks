@@ -21,13 +21,10 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegistrationController extends AbstractController
 {
-
-
-
     /**
      * @Route("/signup", name="signup")
      */
-    public function signup(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, UsersAuthenticator $authenticator, EntityManagerInterface $entityManager,  SendMailService $email, JWTService $jwt): Response
+    public function signup(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, UsersAuthenticator $authenticator, EntityManagerInterface $entityManager, SendMailService $email, JWTService $jwt): Response
     {
         $user = new Users();
 

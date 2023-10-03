@@ -27,7 +27,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * @Assert\Length(min=3, max=50, 
+     * @Assert\Length(min=3, max=50,
      * minMessage="Votre pseudo doit contenir au moins 3 caractères",
      * maxMessage="Votre pseudo ne peut contenir plus de 50 caractères")
      */

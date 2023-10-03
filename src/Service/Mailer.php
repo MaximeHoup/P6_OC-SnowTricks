@@ -8,7 +8,6 @@ use Symfony\Component\Mime\Address;
 
 class Mailer
 {
-
     public function __construct(MailerInterface $mailer)
     {
         $this->mailer = $mailer;
