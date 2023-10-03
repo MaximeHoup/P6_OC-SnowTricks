@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Users;
 use App\Service\SendMailService;
 use App\Service\JWTService;
+use App\Security\UsersAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,16 +17,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegistrationController extends AbstractController
 {
-
-
-
     /**
      * @Route("/signup", name="signup")
      */
-    public function signup(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager,  SendMailService $email, JWTService $jwt): Response
+    public function signup(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, UsersAuthenticator $authenticator, EntityManagerInterface $entityManager, SendMailService $email, JWTService $jwt): Response
     {
         $user = new Users();
 
@@ -95,6 +94,12 @@ class RegistrationController extends AbstractController
                 'Activation de votre compte sur le site SnowTricks',
                 'registration',
                 compact('user', 'token')
+            );
+
+            return $userAuthenticator->authenticateUser(
+                $user,
+                $authenticator,
+                $request
             );
 
             $this->addFlash('success', 'Votre compte a bien été créé');

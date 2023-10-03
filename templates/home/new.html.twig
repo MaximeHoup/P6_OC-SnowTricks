@@ -71,10 +71,11 @@
 								</div>
 							{% endfor %}
 						</div>
-						<br>
-						<div class="row text-center">
-							<div class="col">
-
+					{% endif %}
+					<br>
+					<div class="row text-center">
+						<div class="col">
+							{% if editMode %}
 
 								<button type="submit" class="btn btn-success">
 									Enregister les modifications

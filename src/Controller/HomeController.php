@@ -14,11 +14,17 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\Form\CommentType;
 use App\Repository\CommentsRepository;
 use App\Repository\TricksRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 class HomeController extends AbstractController
 {
+    public function __construct(
+        private readonly ManagerRegistry $getDoctrine
+    ) {
+    }
+
     /**
      * @Route("/", name="home")
      */
@@ -36,11 +42,11 @@ class HomeController extends AbstractController
      */
     public function show($id, $name, $page, CommentsRepository $commentsRepository, Request $request)
     {
-        $trick = $this->getDoctrine()->getRepository(Tricks::class)->find($id);
-        $name = $this->getDoctrine()->getRepository(Tricks::class)->find($name);
-        $images = $this->getDoctrine()->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
-        $videos = $this->getDoctrine()->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
-        $figureGroup = $this->getDoctrine()->getRepository(FigureGroup::class)->find($id);
+        $trick = $this->getDoctrine->getRepository(Tricks::class)->find($id);
+        $name = $this->getDoctrine->getRepository(Tricks::class)->find($name);
+        $images = $this->getDoctrine->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
+        $videos = $this->getDoctrine->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
+        $figureGroup = $this->getDoctrine->getRepository(FigureGroup::class)->find($id);
 
         $comment = new Comments();
         $commentForm = $this->createForm(CommentType::class, $comment);
@@ -49,7 +55,7 @@ class HomeController extends AbstractController
         $commentsperpage = 10;
         $nbcomments = $commentsRepository->count([]);
         (int)$nbpages = ceil(num: $nbcomments / $commentsperpage);
-        $comments = $this->getDoctrine()->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()], ['id' => 'DESC'], limit: $commentsperpage, offset: ($page - 1) * $commentsperpage);
+        $comments = $this->getDoctrine->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()], ['id' => 'DESC'], limit: $commentsperpage, offset: ($page - 1) * $commentsperpage);
 
 
         if ($commentForm->isSubmitted() && $commentForm->isValid()) {
@@ -57,7 +63,7 @@ class HomeController extends AbstractController
                 ->setUsers($this->getUser())
                 ->setTricks($trick);
 
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->getDoctrine->getManager();
             $entityManager->persist($comment);
             $entityManager->flush();
 
@@ -119,11 +125,11 @@ class HomeController extends AbstractController
         }
 
         if (!$images) {
-            $images = $this->getDoctrine()->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
+            $images = $this->getDoctrine->getRepository(Media::class)->findby(['tricks' => $trick->getId()]);
         }
 
         if (!$videos) {
-            $videos = $this->getDoctrine()->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
+            $videos = $this->getDoctrine->getRepository(Videos::class)->findby(['trick' => $trick->getId()]);
         }
 
         $trickForm = $this->createFormBuilder($trick)
@@ -212,16 +218,16 @@ class HomeController extends AbstractController
                 $trick->addVideos($vid);
             }
 
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($trick);
-            $entityManager->flush();
-
             if ($trick->getId() !== null) {
                 $this->addFlash('success', 'Modification effectuée');
             } else {
                 $this->addFlash('success', 'Nouvelle figure ajoutée');
             }
+
+            $entityManager = $this->getDoctrine->getManager();
+            $entityManager->persist($trick);
+            $entityManager->flush();
+
             return $this->redirectToRoute('tricks');
         }
         return $this->render('home/new.html.twig', [
@@ -236,9 +242,9 @@ class HomeController extends AbstractController
     /**
      * @Route("/trick/{id}/delete", name="delete")
      */
-    public function deleteTrick(Tricks $trick = null,  $id)
+    public function deleteTrick(Tricks $trick = null, $id)
     {
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->getDoctrine->getManager();
         $trick = $entityManager->getRepository(Tricks::class)->find($id);
 
         $comments = $entityManager->getRepository(Comments::class)->findBy(['Tricks' => $trick->getId()]);
@@ -255,7 +261,7 @@ class HomeController extends AbstractController
      */
     public function deleteImage(Media $media = null, $id)
     {
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->getDoctrine->getManager();
         $media = $entityManager->getRepository(Media::class)->find($id);
         $entityManager->remove($media);
         $entityManager->flush();
@@ -265,9 +271,9 @@ class HomeController extends AbstractController
     /**
      * @Route("/video/{id}/delete", name="deletevideo")
      */
-    public function deleteVideo(Videos $video = null,  $id)
+    public function deleteVideo(Videos $video = null, $id)
     {
-        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $this->getDoctrine->getManager();
         $video = $entityManager->getRepository(Videos::class)->find($id);
         $entityManager->remove($video);
         $entityManager->flush();
