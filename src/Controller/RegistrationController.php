@@ -17,10 +17,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegistrationController extends AbstractController
 {
+    public function __construct(
+        private readonly ManagerRegistry $getDoctrine
+    ) {
+    }
+
     /**
      * @Route("/signup", name="signup")
      */
@@ -69,7 +75,7 @@ class RegistrationController extends AbstractController
             }
 
 
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->getDoctrine->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
 
@@ -96,11 +102,7 @@ class RegistrationController extends AbstractController
                 compact('user', 'token')
             );
 
-            return $userAuthenticator->authenticateUser(
-                $user,
-                $authenticator,
-                $request
-            );
+
 
             $this->addFlash('success', 'Votre compte a bien été créé');
 

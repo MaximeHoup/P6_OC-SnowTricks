@@ -12,16 +12,21 @@
 				<div class="col" id="form">
 					{{ form_start(formTrick) }}
 					{{ form_errors(formTrick) }}
-					{{ form_row(formTrick.name, {'attr': {'placeholder': "Nom de la figure"}}) }}
-					{{ form_row(formTrick.figureGroup, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}
-					{{ form_row(formTrick.Description, {'attr': {'placeholder': "Description de la figure"}}) }}
+					<div class="col my-2">{{ form_row(formTrick.name, {'attr': {'placeholder': "Nom de la figure"}}) }}</div>
+					<div class="col my-2">{{ form_row(formTrick.figureGroup, {'attr': {'placeholder': "Groupe auquel appartient la figure"}}) }}</div>
+					<div class="col my-2">{{ form_row(formTrick.Description, {'attr': {'placeholder': "Description de la figure"}}) }}</div>
+
+
 					{% if editMode %}
-						{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Changer l'image principale"}}) }}
+						<div class="col my-2">{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Changer l'image principale"}}) }}</div>
+
 					{% else %}
-						{{ form_row(formTrick.mainMedia, {'attr': {'placeholder': "Image principale"}}) }}
+						<div class="col my-2">{{ form_row(formTrick.mainMedia) }}</div>
+
 					{% endif %}
-					{{ form_row(formTrick.media, {'attr': {'placeholder': "Ajouter d'autres images"}}) }}
-					{{ form_row(formTrick.video, {'attr': {'placeholder': "Ajouter l'url d'une vidéo"}}) }}
+					<div class="col my-2">{{ form_row(formTrick.media) }}</div>
+					<div class="col my-2">{{ form_row(formTrick.video, {'attr': {'placeholder': "Ajouter l'url d'une vidéo"}}) }}</div>
+
 
 					{% if editMode %}
 

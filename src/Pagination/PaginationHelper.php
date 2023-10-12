@@ -10,7 +10,7 @@ class PaginationHelper
 
     public function __construct(RouterInterface $router)
     {
-        $this->router = $router;
+        $this->routerInterface = $router;
     }
     /**
      * @param $page
@@ -22,10 +22,10 @@ class PaginationHelper
         $paginationLinks = array(
             'page' => $page,
             'pages' => $pages,
-            'firstPage' => $this->router->generate('home', ['page' => '1']),
-            'lastPage' => $this->router->generate('home', ['page' => $pages]),
-            'nextPage' => $this->router->generate('home', ['page' => ($page + 1)]),
-            'previousPage' => $this->router->generate('home', ['page' => ($page - 1)])
+            'firstPage' => $this->routerInterface->generate('home', ['page' => '1']),
+            'lastPage' => $this->routerInterface->generate('home', ['page' => $pages]),
+            'nextPage' => $this->routerInterface->generate('home', ['page' => ($page + 1)]),
+            'previousPage' => $this->routerInterface->generate('home', ['page' => ($page - 1)])
         );
         return $paginationLinks;
     }
@@ -40,10 +40,10 @@ class PaginationHelper
         $paginationLinks = array(
             'page' => $page,
             'pages' => $pages,
-            'firstPage' => $this->router->generate('view_trick', ['slug' => $trickSlug, 'page' => '1']),
-            'lastPage' => $this->router->generate('view_trick', ['slug' => $trickSlug, 'page' => $pages]),
-            'nextPage' => $this->router->generate('view_trick', ['slug' => $trickSlug, 'page' => ($page + 1)]),
-            'previousPage' => $this->router->generate('view_trick', ['slug' => $trickSlug, 'page' => ($page - 1)])
+            'firstPage' => $this->routerInterface->generate('view_trick', ['slug' => $trickSlug, 'page' => '1']),
+            'lastPage' => $this->routerInterface->generate('view_trick', ['slug' => $trickSlug, 'page' => $pages]),
+            'nextPage' => $this->routerInterface->generate('view_trick', ['slug' => $trickSlug, 'page' => ($page + 1)]),
+            'previousPage' => $this->routerInterface->generate('view_trick', ['slug' => $trickSlug, 'page' => ($page - 1)])
         );
         return $paginationLinks;
     }

@@ -66,7 +66,7 @@ class Tricks
     private $mainMedia;
 
     /**
-     * @ORM\OneToMany(targetEntity=Comments::class, mappedBy="Tricks", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Comments::class, mappedBy="Tricks", cascade={"persist"}, orphanRemoval=true)
      */
     private $comments;
 
