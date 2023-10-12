@@ -28,13 +28,13 @@ class TrickFormType extends AbstractType
             ->add('mainMedia', FileType::class, [
                 'data_class' => null,
                 'mapped' => false,
-                'label' => false,
+                'label' => 'Image principale',
                 'required' => false
             ])
             ->add('media', FileType::class, [
                 'data_class' => null,
                 'mapped' => false,
-                'label' => false,
+                'label' => 'Ajouter d\'autres images',
                 'multiple' => true,
                 'required' => false
             ])

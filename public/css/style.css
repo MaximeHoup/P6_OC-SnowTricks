@@ -1,5 +1,6 @@
 #hero {
     width: 100%;
+    height: auto;
     align-items: center;
     position: relative;
 }
@@ -9,14 +10,18 @@ body {
 }
 
 .down {
-    font-size: 4rem;
+    font-size: 3rem;
     position: absolute;
     bottom: 0;
     right: 0;
 }
 
 .up {
-    font-size: 4rem;
+    font-size: 3rem;
     float: right;
-    margin-top: -100px;
+}
+
+#comments {
+    position: relative;
+    left: 40%;
 }

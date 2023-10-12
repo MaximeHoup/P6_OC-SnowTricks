@@ -82,11 +82,11 @@ class SecurityController extends AbstractController
                 );
 
                 $this->addFlash('success', 'Email envoyé avec succès');
-                return $this->redirectToRoute('app_login');
+                return $this->redirectToRoute('home');
             }
             // $user est null
             $this->addFlash('danger', 'Un problème est survenu');
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('home');
         }
 
         return $this->render('security/reset_password_request.html.twig', [
