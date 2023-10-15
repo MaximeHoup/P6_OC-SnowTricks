@@ -14,7 +14,8 @@ Développez de A à Z le site communautaire SnowTricks
  
 ## Respect des bonnes pratique
 Utilisation de [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer)
-Codacy badge
+
+Codacy [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d1b99d36e7a4cc089434cfe576b6c75)](https://app.codacy.com/gh/MaximeHoup/P6_OC-SnowTricks/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 ## Installation du projet
 1.Télécharger ou cloner le repository suivant:
